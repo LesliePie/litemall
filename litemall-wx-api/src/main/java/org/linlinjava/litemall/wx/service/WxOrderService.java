@@ -22,6 +22,9 @@ import org.linlinjava.litemall.core.task.TaskService;
 import org.linlinjava.litemall.core.util.DateTimeUtil;
 import org.linlinjava.litemall.core.util.JacksonUtil;
 import org.linlinjava.litemall.core.util.ResponseUtil;
+import org.linlinjava.litemall.db.dao.LitemallUserMapper;
+import org.linlinjava.litemall.db.dao.TbUserVipMapper;
+import org.linlinjava.litemall.db.dao.UserExtendMapper;
 import org.linlinjava.litemall.db.domain.*;
 import org.linlinjava.litemall.db.service.*;
 import org.linlinjava.litemall.db.util.CouponUserConstant;
@@ -34,16 +37,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.linlinjava.litemall.wx.util.WxResponseCode.*;
 
@@ -108,7 +110,10 @@ public class WxOrderService {
     private CouponVerifyService couponVerifyService;
     @Autowired
     private TaskService taskService;
-
+    @Autowired
+    private TbUserVipMapper userVipMapper;
+    @Autowired
+    private UserExtendMapper userExtendMapper;
     /**
      * 订单列表
      *
@@ -718,6 +723,14 @@ public class WxOrderService {
         if (orderService.updateWithOptimisticLocker(order) == 0) {
             return WxPayNotifyResponse.fail("更新数据已失效");
         }
+        //更新余额
+
+
+
+
+
+
+
 
         //  支付成功，有团购信息，更新团购信息
         LitemallGroupon groupon = grouponService.queryByOrderId(order.getId());
@@ -1000,6 +1013,76 @@ public class WxOrderService {
         orderService.updateWithOptimisticLocker(order);
 
         return ResponseUtil.ok();
+    }
+
+    public void updateMoney(){
+        //查询最新的订单
+        LitemallOrder one = orderService.selectNewOne();
+        if (one == null) {
+            return;
+        }
+        Integer userId = one.getUserId();
+        //查询是否有信息
+        TbUserVip tbUserVip=userVipMapper.selectByUserId(userId);
+        if (tbUserVip == null) {
+            tbUserVip.setCreateTime(LocalDateTime.now());
+            tbUserVip.setOrderId(one.getId().longValue());
+            tbUserVip.setUserId(userId.longValue());
+
+        }
+        tbUserVip.setResultTime(2);
+        if (tbUserVip.getId()==null){
+            userVipMapper.insert(tbUserVip);
+        }else {
+            userVipMapper.updateByPrimaryKey(tbUserVip);
+        }
+        //查询订单是否为5的倍数
+        Integer orderCount= orderService.selectCount();
+        if (orderCount==0||orderCount%5!=0){
+            return;
+        }
+        //查询最新的五个订单
+        LitemallOrder odOrder= orderService.selectLastFiveOrder();
+        if (odOrder==null){
+            return;
+        }
+
+        Integer id = odOrder.getUserId();
+        UserExtendExample example = new UserExtendExample();
+        UserExtendExample.Criteria criteria = example.createCriteria().andUserIdEqualTo(id.longValue());
+            example.or(criteria);
+        List<UserExtend> userExtends = userExtendMapper.selectByExample(example);
+        if (CollectionUtils.isEmpty(userExtends)) {
+            return;
+        }
+        UserExtend userExtend = userExtends.get(0);
+
+        Long availableBalance = userExtend.getWithdrawMoney();
+        //Integer currentBalance = rdMember.getCurrentBalance();
+        //增加余额和优惠卷
+        userExtend.setWithdrawMoney(availableBalance==null?1000:availableBalance+1000);
+       // rdMember.setCurrentBalance(currentBalance==null?1000:currentBalance+1000);
+        //修改余额
+        userExtendMapper.updateByPrimaryKey(userExtend);
+        //减少可提现次数
+        //tbUserVipMapper.updateByUserId(id);
+        //向上级增加金额
+        UserExtendExample example2 = new UserExtendExample();
+        UserExtendExample.Criteria criteria2 = example2.createCriteria().andUserIdEqualTo(userId.longValue());
+        example2.or(criteria2);
+        List<UserExtend> userExtend2 = userExtendMapper.selectByExample(example);
+        if (CollectionUtils.isEmpty(userExtend2)) {
+            return;
+        }
+        UserExtend recomend = userExtend2.get(0);
+
+        int count=orderService.count(userId);
+        if (recomend.getRecommondUserId() != null&&count==1) {
+            BigDecimal amount = odOrder.getActualPrice();
+            BigDecimal resultMoney=amount.divide(new BigDecimal(10),2, RoundingMode.HALF_UP);
+            //增加上级的金额
+            userExtendMapper.addMoney(recomend.getRecommondUserId(),resultMoney.longValue());
+        }
     }
 
 }

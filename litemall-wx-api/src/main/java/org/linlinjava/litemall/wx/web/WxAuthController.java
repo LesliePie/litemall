@@ -12,7 +12,9 @@ import org.linlinjava.litemall.core.util.JacksonUtil;
 import org.linlinjava.litemall.core.util.RegexUtil;
 import org.linlinjava.litemall.core.util.ResponseUtil;
 import org.linlinjava.litemall.core.util.bcrypt.BCryptPasswordEncoder;
+import org.linlinjava.litemall.db.dao.UserExtendMapper;
 import org.linlinjava.litemall.db.domain.LitemallUser;
+import org.linlinjava.litemall.db.domain.UserExtend;
 import org.linlinjava.litemall.db.service.CouponAssignService;
 import org.linlinjava.litemall.db.service.LitemallUserService;
 import org.linlinjava.litemall.wx.annotation.LoginUser;
@@ -56,6 +58,8 @@ public class WxAuthController {
     @Autowired
     private CouponAssignService couponAssignService;
 
+    @Autowired
+    private UserExtendMapper userExtendMapper;
     /**
      * 账号登录
      *
@@ -152,7 +156,10 @@ public class WxAuthController {
             user.setSessionKey(sessionKey);
 
             userService.add(user);
-
+            //添加临时
+            UserExtend userExtend=new UserExtend();
+            userExtend.setUserId(user.getId().longValue());
+            userExtendMapper.insert(userExtend);
             // 新用户发送注册优惠券
             couponAssignService.assignForRegister(user.getId());
         } else {
@@ -306,7 +313,10 @@ public class WxAuthController {
         user.setLastLoginTime(LocalDateTime.now());
         user.setLastLoginIp(IpUtil.getIpAddr(request));
         userService.add(user);
-
+        //添加临时
+        UserExtend userExtend=new UserExtend();
+        userExtend.setUserId(user.getId().longValue());
+        userExtendMapper.insert(userExtend);
         // 给新用户发送注册优惠券
         couponAssignService.assignForRegister(user.getId());
 
@@ -390,8 +400,9 @@ public class WxAuthController {
 
         //判断验证码是否正确
         String cacheCode = CaptchaCodeManager.getCachedCaptcha(mobile);
-        if (cacheCode == null || cacheCode.isEmpty() || !cacheCode.equals(code))
+        if (cacheCode == null || cacheCode.isEmpty() || !cacheCode.equals(code)) {
             return ResponseUtil.fail(AUTH_CAPTCHA_UNMATCH, "验证码错误");
+        }
 
         List<LitemallUser> userList = userService.queryByMobile(mobile);
         LitemallUser user = null;
@@ -444,8 +455,9 @@ public class WxAuthController {
 
         //判断验证码是否正确
         String cacheCode = CaptchaCodeManager.getCachedCaptcha(mobile);
-        if (cacheCode == null || cacheCode.isEmpty() || !cacheCode.equals(code))
+        if (cacheCode == null || cacheCode.isEmpty() || !cacheCode.equals(code)) {
             return ResponseUtil.fail(AUTH_CAPTCHA_UNMATCH, "验证码错误");
+        }
 
         List<LitemallUser> userList = userService.queryByMobile(mobile);
         LitemallUser user = null;

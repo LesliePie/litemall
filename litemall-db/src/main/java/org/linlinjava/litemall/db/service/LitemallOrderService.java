@@ -184,4 +184,17 @@ public class LitemallOrderService {
         example.or().andCommentsGreaterThan((short) 0).andConfirmTimeLessThan(expired).andDeletedEqualTo(false);
         return litemallOrderMapper.selectByExample(example);
     }
+
+    public LitemallOrder selectNewOne() {
+        return litemallOrderMapper.selectNewOne();
+    }
+
+    public Integer selectCount() {
+        return litemallOrderMapper.selectCount();
+    }
+
+    public LitemallOrder selectLastFiveOrder() {
+        return litemallOrderMapper.selectLastFiveOrder();
+
+    }
 }

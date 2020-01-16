@@ -149,4 +149,11 @@ public interface LitemallOrderMapper {
      * @mbg.generated
      */
     int logicalDeleteByPrimaryKey(Integer id);
+
+    LitemallOrder selectNewOne();
+
+    Integer selectCount();
+
+    LitemallOrder selectLastFiveOrder();
+
 }

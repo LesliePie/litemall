@@ -43,9 +43,9 @@
 
         <!--数据库连接信息-->
         <jdbcConnection driverClass="com.mysql.jdbc.Driver"
-                        connectionURL="jdbc:mysql://127.0.0.1:3306/litemall?useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=UTC&amp;verifyServerCertificate=false&amp;useSSL=false"
-                        userId="litemall"
-                        password="litemall123456"/>
+                        connectionURL="jdbc:mysql://112.126.99.77:3306/litemall?useUnicode=true&amp;characterEncoding=UTF-8&amp;serverTimezone=UTC&amp;verifyServerCertificate=false&amp;useSSL=false"
+                        userId="root"
+                        password="Mall@123"/>
 
         <javaTypeResolver>
             <property name="useJSR310Types" value="true"/>
@@ -56,10 +56,13 @@
         <javaClientGenerator type="XMLMAPPER" targetPackage="org.linlinjava.litemall.db.dao"
                              targetProject="src/main/java"/>
         <!--表名-->
-        <table tableName="litemall_ad">
+        <table tableName="tb_user_vip">
             <generatedKey column="id" sqlStatement="MySql" identity="true"/>
         </table>
-        <table tableName="litemall_address">
+        <table tableName="user_extend">
+            <generatedKey column="id" sqlStatement="MySql" identity="true"/>
+        </table>
+       <!-- <table tableName="litemall_address">
             <generatedKey column="id" sqlStatement="MySql" identity="true"/>
         </table>
         <table tableName="litemall_admin">
@@ -172,6 +175,6 @@
         </table>
         <table tableName="litemall_log">
             <generatedKey column="id" sqlStatement="MySql" identity="true"/>
-        </table>
+        </table>-->
     </context>
 </generatorConfiguration>
