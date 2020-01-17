@@ -25,6 +25,7 @@ import org.linlinjava.litemall.wx.service.CaptchaCodeManager;
 import org.linlinjava.litemall.wx.service.UserTokenManager;
 import org.linlinjava.litemall.core.util.IpUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -122,6 +123,7 @@ public class WxAuthController {
     public Object loginByWeixin(@RequestBody WxLoginInfo wxLoginInfo, HttpServletRequest request) {
         String code = wxLoginInfo.getCode();
         UserInfo userInfo = wxLoginInfo.getUserInfo();
+        String recommendPhone=wxLoginInfo.getRecommendPhone();
         if (code == null || userInfo == null) {
             return ResponseUtil.badArgument();
         }
@@ -159,6 +161,15 @@ public class WxAuthController {
             //添加临时
             UserExtend userExtend=new UserExtend();
             userExtend.setUserId(user.getId().longValue());
+            if (!StringUtils.isEmpty(recommendPhone)){
+                //添加推荐人
+                List<LitemallUser> litemallUsers = userService.queryByMobile(recommendPhone);
+                if (!CollectionUtils.isEmpty(litemallUsers)) {
+                    LitemallUser litemallUser = litemallUsers.get(0);
+                    userExtend.setRecommondUserId(litemallUser.getId().longValue());
+                    userExtend.setRecommondUserName(litemallUser.getUsername());
+                }
+            }
             userExtendMapper.insert(userExtend);
             // 新用户发送注册优惠券
             couponAssignService.assignForRegister(user.getId());
@@ -245,6 +256,7 @@ public class WxAuthController {
         String password = JacksonUtil.parseString(body, "password");
         String mobile = JacksonUtil.parseString(body, "mobile");
         String code = JacksonUtil.parseString(body, "code");
+        String recommendPhone = request.getHeader("recommendPhone");
         // 如果是小程序注册，则必须非空
         // 其他情况，可以为空
         String wxCode = JacksonUtil.parseString(body, "wxCode");
@@ -316,6 +328,15 @@ public class WxAuthController {
         //添加临时
         UserExtend userExtend=new UserExtend();
         userExtend.setUserId(user.getId().longValue());
+        if (!StringUtils.isEmpty(recommendPhone)){
+            //添加推荐人
+            List<LitemallUser> litemallUsers = userService.queryByMobile(recommendPhone);
+            if (!CollectionUtils.isEmpty(litemallUsers)) {
+                LitemallUser litemallUser = litemallUsers.get(0);
+                userExtend.setRecommondUserId(litemallUser.getId().longValue());
+                userExtend.setRecommondUserName(litemallUser.getUsername());
+            }
+        }
         userExtendMapper.insert(userExtend);
         // 给新用户发送注册优惠券
         couponAssignService.assignForRegister(user.getId());
