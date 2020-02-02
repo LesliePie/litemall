@@ -1,0 +1,7 @@
+litemall:
+  wx:
+    appId: wx79ff1e5a214a14ba
+    mchId: 1487498002
+    appSecret: hkldijkjhynjhddssdjhhgghjkuhnmji
+    mchKey: hkldijkjhynjhddssdjhhgghjkuhnmji
+    notifyUrl: /wx/order/pay-notify

@@ -1,10 +1,11 @@
 package org.linlinjava.litemall.db.dao;
 
-import java.math.BigDecimal;
-import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.linlinjava.litemall.db.domain.UserExtend;
 import org.linlinjava.litemall.db.domain.UserExtendExample;
+
+import java.math.BigInteger;
+import java.util.List;
 
 public interface UserExtendMapper {
     /**
@@ -128,4 +129,8 @@ public interface UserExtendMapper {
     int updateByPrimaryKey(UserExtend record);
 
     void addMoney(@Param("recommondUserId") Long recommondUserId, @Param("resultMoney") long resultMoney);
+
+    UserExtend selectByUserId(@Param("userId") Integer userId);
+
+    void updateUserPrice(@Param("userId") Integer userId, @Param("actualPrice") BigInteger actualPrice);
 }

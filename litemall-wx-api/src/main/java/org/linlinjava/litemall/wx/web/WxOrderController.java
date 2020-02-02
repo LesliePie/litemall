@@ -1,5 +1,8 @@
 package org.linlinjava.litemall.wx.web;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.linlinjava.litemall.core.validator.Order;
@@ -17,6 +20,7 @@ import javax.validation.constraints.NotNull;
 @RestController
 @RequestMapping("/wx/order")
 @Validated
+@Api(value = "订单相关接口")
 public class WxOrderController {
     private final Log logger = LogFactory.getLog(WxOrderController.class);
 
@@ -65,6 +69,18 @@ public class WxOrderController {
     public Object submit(@LoginUser Integer userId, @RequestBody String body) {
         return wxOrderService.submit(userId, body);
     }
+    /**
+     * 提交充值订单
+     *
+     * @param userId 用户ID
+     * @param body   订单信息，{ money：xxx}
+     * @return 提交订单操作结果
+     */
+    @PostMapping(value = "/submitWallet")
+    @ApiOperation(value = "提交充值")
+    public Object submitWallet(@LoginUser Integer userId,@ApiParam(value = "{ money：xxx}")@RequestBody String body){
+        return wxOrderService.submitWallet(userId,body);
+    }
 
     /**
      * 取消订单
@@ -101,6 +117,8 @@ public class WxOrderController {
     public Object h5pay(@LoginUser Integer userId, @RequestBody String body, HttpServletRequest request) {
         return wxOrderService.h5pay(userId, body, request);
     }
+
+
 
     /**
      * 微信付款成功或失败回调接口
@@ -180,4 +198,15 @@ public class WxOrderController {
         return wxOrderService.comment(userId, body);
     }
 
+    /**
+     * orderId:
+     * @param userId
+     * @param body
+     * @return
+     */
+    @PostMapping(value = "/payByMoney")
+    @ApiOperation(value = "余额支付订单")
+    public Object payByMoney(@LoginUser Integer userId, @ApiParam(value = "{'orderId':'xxxxx'}") @RequestBody String body){
+        return wxOrderService.payByMoney(userId, body);
+    }
 }

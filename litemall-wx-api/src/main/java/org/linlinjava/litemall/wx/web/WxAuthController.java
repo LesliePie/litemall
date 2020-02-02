@@ -12,8 +12,10 @@ import org.linlinjava.litemall.core.util.JacksonUtil;
 import org.linlinjava.litemall.core.util.RegexUtil;
 import org.linlinjava.litemall.core.util.ResponseUtil;
 import org.linlinjava.litemall.core.util.bcrypt.BCryptPasswordEncoder;
+import org.linlinjava.litemall.db.dao.TbUserVipMapper;
 import org.linlinjava.litemall.db.dao.UserExtendMapper;
 import org.linlinjava.litemall.db.domain.LitemallUser;
+import org.linlinjava.litemall.db.domain.TbUserVip;
 import org.linlinjava.litemall.db.domain.UserExtend;
 import org.linlinjava.litemall.db.service.CouponAssignService;
 import org.linlinjava.litemall.db.service.LitemallUserService;
@@ -61,6 +63,7 @@ public class WxAuthController {
 
     @Autowired
     private UserExtendMapper userExtendMapper;
+
     /**
      * 账号登录
      *
@@ -338,6 +341,8 @@ public class WxAuthController {
             }
         }
         userExtendMapper.insert(userExtend);
+        //添加用户钱包
+
         // 给新用户发送注册优惠券
         couponAssignService.assignForRegister(user.getId());
 
