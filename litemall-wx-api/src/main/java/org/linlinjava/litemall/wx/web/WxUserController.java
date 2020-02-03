@@ -7,9 +7,11 @@ import org.apache.commons.logging.LogFactory;
 import org.linlinjava.litemall.core.util.ResponseUtil;
 import org.linlinjava.litemall.db.dao.UserExtendMapper;
 import org.linlinjava.litemall.db.domain.LitemallUser;
+import org.linlinjava.litemall.db.domain.vo.LitemallUserVo;
 import org.linlinjava.litemall.db.service.LitemallOrderService;
 import org.linlinjava.litemall.db.service.LitemallUserService;
 import org.linlinjava.litemall.wx.annotation.LoginUser;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.annotation.Validated;
@@ -79,6 +81,28 @@ public class WxUserController {
         }
         String url="?recommendPhone="+mobile;
         return ResponseUtil.ok(url);
+    }
+
+    @GetMapping(value = "/getMyMessage")
+    @ApiOperation(value = "获取我的信息")
+    public Object getMyMessage(@LoginUser Integer userId){
+        if (userId == null) {
+            return ResponseUtil.unlogin();
+        }
+        LitemallUser info = userService.findById(userId);
+        Integer rank =userService.getMyRank(userId);
+        if (rank==null){
+            Integer lastRank=userService.getLastRank();
+            if (lastRank==null){
+                rank=1;
+            }else {
+                rank=lastRank+1;
+            }
+        }
+        LitemallUserVo vo = new LitemallUserVo();
+        BeanUtils.copyProperties(info,vo);
+        vo.setRank(rank);
+        return ResponseUtil.ok(vo);
     }
 
 }

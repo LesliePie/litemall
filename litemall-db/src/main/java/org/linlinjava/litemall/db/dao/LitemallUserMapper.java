@@ -1,9 +1,10 @@
 package org.linlinjava.litemall.db.dao;
 
-import java.util.List;
 import org.apache.ibatis.annotations.Param;
 import org.linlinjava.litemall.db.domain.LitemallUser;
 import org.linlinjava.litemall.db.domain.LitemallUserExample;
+
+import java.util.List;
 
 public interface LitemallUserMapper {
     /**
@@ -149,4 +150,9 @@ public interface LitemallUserMapper {
      * @mbg.generated
      */
     int logicalDeleteByPrimaryKey(Integer id);
+
+    Integer getMyRank(@Param("userId") Integer userId);
+
+    Integer getLastRank();
+
 }

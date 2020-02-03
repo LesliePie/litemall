@@ -100,4 +100,13 @@ public class LitemallUserService {
     public void deleteById(Integer id) {
         userMapper.logicalDeleteByPrimaryKey(id);
     }
+
+    public Integer getMyRank(Integer userId) {
+
+        return userMapper.getMyRank(userId);
+    }
+
+    public Integer getLastRank() {
+        return  userMapper.getLastRank();
+    }
 }
